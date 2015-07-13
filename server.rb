@@ -1,68 +1,29 @@
-class KeyServer
-  attr_reader :available_keys, :blocked_keys
-  def initialize
-    @available_keys = Hash.new(0)
-    @blocked_keys = Hash.new(0)
-    @last_accessed = Hash.new
-  end
+require 'sinatra'
+require_relative 'keyserver.rb'
+$keysrv = KeyServer.new
 
-  def delete_key_after_5_min (key)
-    Thread.new do
-      sleep 5*60
-      if Time.now - @last_accessed[key] >= 5*60
-        delete_key(key)
-      end
-    end      
+get '/E1' do
+  if params[:n].nil?
+    $keysrv.generate_keys(1)
+  else 
+    $keysrv.generate_keys(params[:n].to_i)
   end
+  $keysrv.to_s
+end
 
-  def generate_keys(n)
-    n.times do 
-      key = random_key
-      @available_keys[key] = 1
-      @last_accessed[key] = Time.now
+get '/E2' do
+  $keysrv.serve_key
+end
 
-      delete_key_after_5_min key
-    end
-  end
+get '/E3' do
+  $keysrv.unblock_key(params[:key])
+end
 
-  def serve_key
-    if @available_keys.size  == 0
-      "404"
-    else
-      key = @available_keys.first.first
-      @available_keys.delete key
-      @blocked_keys[key] = 1
-      Thread.new do
-        sleep 60
-        unblock_key(key)
-      end
-      key
-    end
-  end
+get '/E4' do
+  $keysrv.delete_key(params[:key])
+end
 
-  def unblock_key(key)
-    if @blocked_keys[key] == 1
-      @blocked_keys.delete(key)
-      @available_keys[key] = 1
-    end
-  end
-
-  def delete_key(key)
-    @available_keys.delete key
-    @blocked_keys.delete key
-  end
-
-  def keep_alive(key)
-    @last_accessed[key] = Time.now
-    delete_key_after_5_min key
-  end
-
-  def random_key
-    (0...8).map { (65 + rand(26)).chr }.join
-  end
-
-  def to_s
-    @available_keys.to_s + "\n" + @blocked_keys.to_s
-  end
+get '/E5' do
+  $keysrv.keep_alive(params[:key])
 end
 
