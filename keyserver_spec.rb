@@ -1,4 +1,4 @@
-require_relative '../keyserver'
+require_relative 'keyserver'
 
 describe KeyServer do
   before :each do
