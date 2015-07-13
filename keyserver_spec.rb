@@ -42,8 +42,12 @@ describe KeyServer do
       key = @keyserver.serve_key
       expect(@keyserver.blocked_keys.key?(key)).to eq true
       expect(@keyserver.available_keys.key?(key)).to eq false
+      @keyserver.unblock_key key
+      expect(@keyserver.blocked_keys.key?(key)).to eq false
+      expect(@keyserver.available_keys.key?(key)).to eq true
     end
   end
+
 
   describe "#delete_key" do
     it "Deletes a key" do
