@@ -1,9 +1,12 @@
+require 'thread'
+require 'thread_safe'
+
 class KeyServer
   attr_reader :available_keys, :blocked_keys
   def initialize
-    @available_keys = Hash.new(0)
-    @blocked_keys = Hash.new(0)
-    @last_accessed = Hash.new
+    @available_keys = ThreadSafe::Hash.new(0)
+    @blocked_keys = ThreadSafe::Hash.new(0)
+    @last_accessed = ThreadSafe::Hash.new
   end
 
   def delete_key_after_5_min (key)
