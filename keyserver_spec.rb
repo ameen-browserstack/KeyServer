@@ -34,17 +34,23 @@ describe KeyServer do
         expect(@keyserver.serve_key).to eq "404"
       end
     end
+    
+    context "Blocks key" do
+      it "key is put in blocked_keys" do
+        @keyserver.generate_keys(1)
+        key = @keyserver.serve_key
+        expect(@keyserver.blocked_keys.key?(key)).to eq true
+      end
+    end
+
   end
 
   describe "#unblock_key" do
     it "Unblocks a key" do
       @keyserver.generate_keys(1)
       key = @keyserver.serve_key
-      expect(@keyserver.blocked_keys.key?(key)).to eq true
-      expect(@keyserver.available_keys.key?(key)).to eq false
       @keyserver.unblock_key key
       expect(@keyserver.blocked_keys.key?(key)).to eq false
-      expect(@keyserver.available_keys.key?(key)).to eq true
     end
   end
 
